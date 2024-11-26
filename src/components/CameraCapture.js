@@ -1,25 +1,118 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 
 const CameraOverlay = () => {
   const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [detecting, setDetecting] = useState(false);
+  const [isOpenCvReady, setIsOpenCvReady] = useState(false);
 
   const videoConstraints = {
     facingMode: "environment",
   };
 
-  const handleDetection = () => {
-    if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      // Simular la detección: aquí podrías integrar una librería de detección
-      // Si cumple los criterios, captura automáticamente
-      if (imageSrc) {
-        setCapturedImage(imageSrc);
-        setDetecting(false);
+  // Cargar OpenCV.js
+  useEffect(() => {
+    const checkOpenCv = setInterval(() => {
+      if (window.cv && window.cv.imread) {
+        setIsOpenCvReady(true);
+        clearInterval(checkOpenCv);
       }
+    }, 100);
+    return () => clearInterval(checkOpenCv);
+  }, []);
+
+  const handleDetection = () => {
+    if (!webcamRef.current || !canvasRef.current || !isOpenCvReady) return;
+
+    const video = webcamRef.current.video;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    // Configurar el tamaño del canvas
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Dibujar el frame actual en el canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Procesar con OpenCV
+    const frame = window.cv.imread(canvas);
+    const gray = new window.cv.Mat();
+    const edges = new window.cv.Mat();
+    const contours = new window.cv.MatVector();
+    const hierarchy = new window.cv.Mat();
+
+    try {
+      // Convertir a escala de grises
+      window.cv.cvtColor(frame, gray, window.cv.COLOR_RGBA2GRAY, 0);
+
+      // Detectar bordes
+      window.cv.Canny(gray, edges, 50, 150);
+
+      // Encontrar contornos
+      window.cv.findContours(
+        edges,
+        contours,
+        hierarchy,
+        window.cv.RETR_EXTERNAL,
+        window.cv.CHAIN_APPROX_SIMPLE
+      );
+
+      for (let i = 0; i < contours.size(); i++) {
+        const contour = contours.get(i);
+        const rect = window.cv.boundingRect(contour);
+
+        // Verificar si el rectángulo está dentro del área delimitada
+        if (
+          rect.width > 100 &&
+          rect.height > 100 &&
+          rect.x > 150 &&
+          rect.y > 100 &&
+          rect.x + rect.width < 450 &&
+          rect.y + rect.height < 300
+        ) {
+          // Dibujar el rectángulo detectado en el canvas
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+          // Capturar la región del rectángulo
+          const rectCanvas = document.createElement("canvas");
+          rectCanvas.width = rect.width;
+          rectCanvas.height = rect.height;
+          const rectCtx = rectCanvas.getContext("2d");
+          rectCtx.drawImage(
+            canvas,
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
+            0,
+            0,
+            rect.width,
+            rect.height
+          );
+
+          // Guardar la imagen capturada
+          const rectImage = rectCanvas.toDataURL("image/jpeg");
+          setCapturedImage(rectImage);
+
+          // Detener la detección
+          setDetecting(false);
+          break;
+        }
+      }
+    } catch (err) {
+      console.error("Error durante la detección:", err);
+    } finally {
+      frame.delete();
+      gray.delete();
+      edges.delete();
+      contours.delete();
+      hierarchy.delete();
     }
   };
 
@@ -31,7 +124,7 @@ const CameraOverlay = () => {
       } else {
         clearInterval(interval);
       }
-    }, 1000); // Verificar cada segundo
+    }, 500); // Verificar cada 500ms
   };
 
   return (
@@ -44,6 +137,19 @@ const CameraOverlay = () => {
         videoConstraints={videoConstraints}
         style={{ width: "100%", height: "100%", objectFit: "cover" }}
       />
+
+      {/* Canvas para procesamiento */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          display: "none", // Oculto al usuario
+        }}
+      ></canvas>
 
       {/* Overlay */}
       <div
