@@ -16,8 +16,8 @@ const CameraCapture = () => {
       const ctx = canvas.getContext("2d");
 
       // Dimensiones del rectángulo (400x300px)
-      const rectWidth = 420;
-      const rectHeight = 320;
+      const rectWidth = 410;
+      const rectHeight = 260;
 
       // Configurar dimensiones del canvas
       canvas.width = rectWidth;
@@ -60,7 +60,7 @@ const CameraCapture = () => {
       <Box
         sx={{
           width: "400px",
-          height: "300px",
+          height: "250px",
           border: "2px solid #000",
           margin: "0 auto",
           overflow: "hidden",
