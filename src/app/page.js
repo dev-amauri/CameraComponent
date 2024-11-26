@@ -1,12 +1,12 @@
 import Image from "next/image";
 import styles from "./page.module.css";
-import CameraCapture from "@/components/CameraCapture";
+import CameraOverlay from "@/components/CameraCapture";
 
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-       <CameraCapture/>
+       <CameraOverlay/>
        
       </main>
       <footer className={styles.footer}>

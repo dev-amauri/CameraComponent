@@ -1,103 +1,150 @@
 "use client";
 import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
-import { Button, Box, Typography } from "@mui/material";
 
-const CameraCapture = () => {
+const CameraOverlay = () => {
   const webcamRef = useRef(null);
-  const [photo, setPhoto] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [detecting, setDetecting] = useState(false);
 
-  const capturePhoto = () => {
+  const videoConstraints = {
+    facingMode: "environment",
+  };
+
+  const handleDetection = () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
-
-      // Crear un canvas para recortar la imagen
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      // Dimensiones del rectángulo (400x300px)
-      const rectWidth = 410;
-      const rectHeight = 260;
-
-      // Configurar dimensiones del canvas
-      canvas.width = rectWidth;
-      canvas.height = rectHeight;
-
-      // Crear una imagen desde el screenshot
-      const img = new Image();
-      img.src = imageSrc;
-      img.onload = () => {
-        // Dibujar la imagen recortada en el canvas
-        ctx.drawImage(
-          img,
-          (img.width - rectWidth) / 2, // Centrar el rectángulo
-          (img.height - rectHeight) / 2,
-          rectWidth,
-          rectHeight,
-          0,
-          0,
-          rectWidth,
-          rectHeight
-        );
-
-        // Obtener la imagen recortada
-        const croppedImage = canvas.toDataURL("image/png");
-        setPhoto(croppedImage);
-
-        // Descargar la imagen recortada
-        const link = document.createElement("a");
-        link.href = croppedImage;
-        link.download = "captura.png";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      };
+      // Simular la detección: aquí podrías integrar una librería de detección
+      // Si cumple los criterios, captura automáticamente
+      if (imageSrc) {
+        setCapturedImage(imageSrc);
+        setDetecting(false);
+      }
     }
   };
 
+  const startDetection = () => {
+    setDetecting(true);
+    const interval = setInterval(() => {
+      if (detecting) {
+        handleDetection();
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000); // Verificar cada segundo
+  };
+
   return (
-    <Box textAlign="center" sx={{ mt: 4 }}>
-      <Box
-        sx={{
-          width: "400px",
-          height: "250px",
-          border: "2px solid #000",
-          margin: "0 auto",
-          overflow: "hidden",
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+      {/* Webcam */}
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        videoConstraints={videoConstraints}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+
+      {/* Overlay */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
         }}
       >
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          screenshotFormat="image/png"
-          videoConstraints={{
-            facingMode: "environment", // Usar cámara trasera en móviles
-          }}
+        <div
           style={{
+            width: "300px",
+            height: "200px",
+            border: "4px dashed #fff",
+            borderRadius: "20px",
+            background: "rgba(255, 255, 255, 0.2)",
+            boxShadow: "0 0 15px rgba(255, 255, 255, 0.5)",
+          }}
+        ></div>
+        <p style={{ color: "#fff", marginTop: "20px", textAlign: "center" }}>
+          Coloca el objeto dentro del rectángulo y espera para capturar la foto
+        </p>
+      </div>
+
+      {/* Botones */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        {!detecting ? (
+          <button
+            onClick={startDetection}
+            style={{
+              padding: "10px 20px",
+              fontSize: "16px",
+              background: "#4CAF50",
+              color: "#fff",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Iniciar Detección
+          </button>
+        ) : (
+          <p style={{ color: "#fff" }}>Detectando...</p>
+        )}
+      </div>
+
+      {/* Mostrar imagen capturada */}
+      {capturedImage && (
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
             width: "100%",
             height: "100%",
-            objectFit: "cover",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
-        />
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={capturePhoto}
-          sx={{ mr: 2 }}
         >
-          Tomar Foto
-        </Button>
-      </Box>
-      {photo && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Foto Capturada:</Typography>
-          <img src={photo} alt="Captura" style={{ maxWidth: "100%" }} />
-        </Box>
+          <img
+            src={capturedImage}
+            alt="Captured"
+            style={{ maxWidth: "80%", maxHeight: "80%" }}
+          />
+          <button
+            onClick={() => setCapturedImage(null)}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              background: "#ff4c4c",
+              color: "#fff",
+              border: "none",
+              padding: "10px",
+              borderRadius: "50%",
+              cursor: "pointer",
+            }}
+          >
+            ✖
+          </button>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
-export default CameraCapture;
+export default CameraOverlay;
