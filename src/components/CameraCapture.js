@@ -10,7 +10,48 @@ const CameraCapture = () => {
   const capturePhoto = () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
-      setPhoto(imageSrc);
+
+      // Crear un canvas para recortar la imagen
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Dimensiones del rectángulo (400x300px)
+      const rectWidth = 420;
+      const rectHeight = 320;
+
+      // Configurar dimensiones del canvas
+      canvas.width = rectWidth;
+      canvas.height = rectHeight;
+
+      // Crear una imagen desde el screenshot
+      const img = new Image();
+      img.src = imageSrc;
+      img.onload = () => {
+        // Dibujar la imagen recortada en el canvas
+        ctx.drawImage(
+          img,
+          (img.width - rectWidth) / 2, // Centrar el rectángulo
+          (img.height - rectHeight) / 2,
+          rectWidth,
+          rectHeight,
+          0,
+          0,
+          rectWidth,
+          rectHeight
+        );
+
+        // Obtener la imagen recortada
+        const croppedImage = canvas.toDataURL("image/png");
+        setPhoto(croppedImage);
+
+        // Descargar la imagen recortada
+        const link = document.createElement("a");
+        link.href = croppedImage;
+        link.download = "captura.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
     }
   };
 
@@ -18,8 +59,8 @@ const CameraCapture = () => {
     <Box textAlign="center" sx={{ mt: 4 }}>
       <Box
         sx={{
-          width: "300px",
-          height: "200px",
+          width: "400px",
+          height: "300px",
           border: "2px solid #000",
           margin: "0 auto",
           overflow: "hidden",
