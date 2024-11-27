@@ -5,8 +5,6 @@ import Webcam from "react-webcam";
 const CameraOverlay = () => {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [detecting, setDetecting] = useState(false);
   const [isOpenCvReady, setIsOpenCvReady] = useState(false);
 
   const videoConstraints = {
@@ -24,7 +22,7 @@ const CameraOverlay = () => {
     return () => clearInterval(checkOpenCv);
   }, []);
 
-  const handleDetection = () => {
+  const handleCaptureAndDownload = () => {
     if (!webcamRef.current || !canvasRef.current || !isOpenCvReady) return;
 
     const video = webcamRef.current.video;
@@ -38,93 +36,52 @@ const CameraOverlay = () => {
     // Dibujar el frame actual en el canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Procesar con OpenCV
+    // Procesar con OpenCV para recortar el área marcada
     const frame = window.cv.imread(canvas);
-    const gray = new window.cv.Mat();
-    const edges = new window.cv.Mat();
-    const contours = new window.cv.MatVector();
-    const hierarchy = new window.cv.Mat();
 
     try {
-      // Convertir a escala de grises
-      window.cv.cvtColor(frame, gray, window.cv.COLOR_RGBA2GRAY, 0);
+      // Definir el área delimitada por el rectángulo (coordenadas del overlay)
+      const rectX = (canvas.width - 300) / 2; // Centrado horizontalmente
+      const rectY = (canvas.height - 200) / 2; // Centrado verticalmente
+      const rectWidth = 300;
+      const rectHeight = 200;
 
-      // Detectar bordes
-      window.cv.Canny(gray, edges, 50, 150);
+      // Crear un canvas para mejorar la calidad de la imagen recortada
+      const scaledCanvas = document.createElement("canvas");
+      const scaleFactor = 2; // Factor de escalado para mejorar calidad
+      scaledCanvas.width = rectWidth * scaleFactor;
+      scaledCanvas.height = rectHeight * scaleFactor;
 
-      // Encontrar contornos
-      window.cv.findContours(
-        edges,
-        contours,
-        hierarchy,
-        window.cv.RETR_EXTERNAL,
-        window.cv.CHAIN_APPROX_SIMPLE
+      const scaledCtx = scaledCanvas.getContext("2d");
+      scaledCtx.drawImage(
+        canvas,
+        rectX,
+        rectY,
+        rectWidth,
+        rectHeight,
+        0,
+        0,
+        scaledCanvas.width,
+        scaledCanvas.height
       );
 
-      for (let i = 0; i < contours.size(); i++) {
-        const contour = contours.get(i);
-        const rect = window.cv.boundingRect(contour);
-
-        // Verificar si el rectángulo está dentro del área delimitada
-        if (
-          rect.width > 100 &&
-          rect.height > 100 &&
-          rect.x > 150 &&
-          rect.y > 100 &&
-          rect.x + rect.width < 450 &&
-          rect.y + rect.height < 300
-        ) {
-          // Dibujar el rectángulo detectado en el canvas
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 4;
-          ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-
-          // Capturar la región del rectángulo
-          const rectCanvas = document.createElement("canvas");
-          rectCanvas.width = rect.width;
-          rectCanvas.height = rect.height;
-          const rectCtx = rectCanvas.getContext("2d");
-          rectCtx.drawImage(
-            canvas,
-            rect.x,
-            rect.y,
-            rect.width,
-            rect.height,
-            0,
-            0,
-            rect.width,
-            rect.height
-          );
-
-          // Guardar la imagen capturada
-          const rectImage = rectCanvas.toDataURL("image/jpeg");
-          setCapturedImage(rectImage);
-
-          // Detener la detección
-          setDetecting(false);
-          break;
-        }
-      }
+      // Convertir el canvas escalado en una imagen descargable
+      const scaledImage = scaledCanvas.toDataURL("image/jpeg", 1.0); // Calidad máxima
+      downloadImage(scaledImage, "captura.jpg");
     } catch (err) {
-      console.error("Error durante la detección:", err);
+      console.error("Error al capturar el área:", err);
     } finally {
       frame.delete();
-      gray.delete();
-      edges.delete();
-      contours.delete();
-      hierarchy.delete();
     }
   };
 
-  const startDetection = () => {
-    setDetecting(true);
-    const interval = setInterval(() => {
-      if (detecting) {
-        handleDetection();
-      } else {
-        clearInterval(interval);
-      }
-    }, 500); // Verificar cada 500ms
+  const downloadImage = (dataUrl, filename) => {
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -177,11 +134,12 @@ const CameraOverlay = () => {
           }}
         ></div>
         <p style={{ color: "#fff", marginTop: "20px", textAlign: "center" }}>
-          Coloca el objeto dentro del rectángulo y espera para capturar la foto
+          Coloca el objeto dentro del rectángulo y presiona el botón para
+          capturar
         </p>
       </div>
 
-      {/* Botones */}
+      {/* Botón para capturar */}
       <div
         style={{
           position: "absolute",
@@ -191,64 +149,22 @@ const CameraOverlay = () => {
           justifyContent: "center",
         }}
       >
-        {!detecting ? (
-          <button
-            onClick={startDetection}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              background: "#4CAF50",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            Iniciar Detección
-          </button>
-        ) : (
-          <p style={{ color: "#fff" }}>Detectando...</p>
-        )}
-      </div>
-
-      {/* Mostrar imagen capturada */}
-      {capturedImage && (
-        <div
+        <button
+          onClick={handleCaptureAndDownload}
+          disabled={!isOpenCvReady}
           style={{
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            padding: "10px 20px",
+            fontSize: "16px",
+            background: isOpenCvReady ? "#4CAF50" : "#ccc",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: isOpenCvReady ? "pointer" : "not-allowed",
           }}
         >
-          <img
-            src={capturedImage}
-            alt="Captured"
-            style={{ maxWidth: "80%", maxHeight: "80%" }}
-          />
-          <button
-            onClick={() => setCapturedImage(null)}
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              background: "#ff4c4c",
-              color: "#fff",
-              border: "none",
-              padding: "10px",
-              borderRadius: "50%",
-              cursor: "pointer",
-            }}
-          >
-            ✖
-          </button>
-        </div>
-      )}
+          {isOpenCvReady ? "Capturar y Descargar" : "Cargando..."}
+        </button>
+      </div>
     </div>
   );
 };
