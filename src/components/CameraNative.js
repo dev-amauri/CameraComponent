@@ -3,16 +3,16 @@ import React, { useState, useEffect } from "react";
 
 const CameraNative = () => {
   const [capturedImage, setCapturedImage] = useState(null);
-  const [processedImage, setProcessedImage] = useState(null);
-  const [opencvLoaded, setOpencvLoaded] = useState(false);
+  const [processedImages, setProcessedImages] = useState([]);
 
   useEffect(() => {
-    // Asegurar que OpenCV esté cargado
-    if (cv && cv["onRuntimeInitialized"]) {
-      cv["onRuntimeInitialized"] = () => {
-        setOpencvLoaded(true);
-      };
-    }
+    // Cargar OpenCV.js
+    const checkOpenCv = setInterval(() => {
+      if (window.cv && window.cv.imread) {
+        clearInterval(checkOpenCv);
+      }
+    }, 100);
+    return () => clearInterval(checkOpenCv);
   }, []);
 
   const handleFileChange = (event) => {
@@ -20,49 +20,59 @@ const CameraNative = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const img = e.target.result;
-        setCapturedImage(img); // Guardar la imagen capturada
-        if (opencvLoaded) {
-          processImage(img); // Procesar la imagen con OpenCV
-        }
+        const imgSrc = e.target.result;
+        setCapturedImage(imgSrc);
+        processImage(imgSrc); // Procesar la imagen capturada
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const processImage = (imageData) => {
-    try {
-      const img = new Image();
-      img.src = imageData;
-      img.onload = () => {
-        const src = cv.imread(img); // Cargar la imagen en formato OpenCV
-        const gray = new cv.Mat();
-        const edges = new cv.Mat();
+  const processImage = (imgSrc) => {
+    if (!window.cv) return;
 
-        // Convertir a escala de grises
-        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+    const processedSteps = [];
+    const imgElement = document.createElement("img");
+    imgElement.src = imgSrc;
 
-        // Aplicar detección de bordes con Canny
-        cv.Canny(gray, edges, 50, 150);
+    imgElement.onload = () => {
+      const src = window.cv.imread(imgElement);
+      processedSteps.push({ title: "Original", image: imgSrc });
 
-        // Mostrar el resultado
-        const canvas = document.createElement("canvas");
-        cv.imshow(canvas, edges);
-        setProcessedImage(canvas.toDataURL()); // Guardar la imagen procesada como base64
+      // Convertir a escala de grises
+      const gray = new window.cv.Mat();
+      window.cv.cvtColor(src, gray, window.cv.COLOR_RGBA2GRAY);
+      processedSteps.push({ title: "Escala de Grises", image: matToDataURL(gray) });
 
-        // Liberar memoria
-        src.delete();
-        gray.delete();
-        edges.delete();
-      };
-    } catch (error) {
-      console.error("Error procesando la imagen:", error);
-    }
+      // Aplicar desenfoque
+      const blurred = new window.cv.Mat();
+      window.cv.GaussianBlur(gray, blurred, new window.cv.Size(5, 5), 0);
+      processedSteps.push({ title: "Desenfocado", image: matToDataURL(blurred) });
+
+      // Detección de bordes
+      const edges = new window.cv.Mat();
+      window.cv.Canny(blurred, edges, 50, 150);
+      processedSteps.push({ title: "Bordes Detectados", image: matToDataURL(edges) });
+
+      setProcessedImages(processedSteps);
+
+      // Liberar memoria
+      src.delete();
+      gray.delete();
+      blurred.delete();
+      edges.delete();
+    };
+  };
+
+  const matToDataURL = (mat) => {
+    const canvas = document.createElement("canvas");
+    window.cv.imshow(canvas, mat);
+    return canvas.toDataURL();
   };
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Captura y Detección de Bordes</h1>
+      <h1>Camara nativa</h1>
 
       {/* Botón para abrir la cámara */}
       <label
@@ -87,7 +97,7 @@ const CameraNative = () => {
         />
       </label>
 
-      {/* Mostrar imagen capturada */}
+      {/* Mostrar imagen capturada
       {capturedImage && (
         <div style={{ marginTop: "20px" }}>
           <h3>Imagen Capturada:</h3>
@@ -102,20 +112,25 @@ const CameraNative = () => {
           />
         </div>
       )}
-
-      {/* Mostrar imagen procesada */}
-      {processedImage && (
+ */}
+      {/* Mostrar imágenes procesadas */}
+      {processedImages.length > 0 && (
         <div style={{ marginTop: "20px" }}>
-          <h3>Detección de Bordes:</h3>
-          <img
-            src={processedImage}
-            alt="Processed"
-            style={{
-              maxWidth: "100%",
-              borderRadius: "10px",
-              border: "2px solid #2196F3",
-            }}
-          />
+          <h3>Procesamiento de Imagen:</h3>
+          {processedImages.map((step, index) => (
+            <div key={index} style={{ marginBottom: "20px" }}>
+              <h4>{step.title}</h4>
+              <img
+                src={step.image}
+                alt={step.title}
+                style={{
+                  maxWidth: "100%",
+                  borderRadius: "10px",
+                  border: "2px solid #4CAF50",
+                }}
+              />
+            </div>
+          ))}
         </div>
       )}
     </div>
