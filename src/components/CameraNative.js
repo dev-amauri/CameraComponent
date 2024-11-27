@@ -25,25 +25,33 @@ const CameraNative = () => {
           left: 0,
           width: "100%",
           height: "100%",
-          background: "rgba(0, 0, 0, 0.5)",
+          background: "rgba(0, 0, 0, 0.6)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
         }}
       >
+        {/* Marco del documento */}
         <div
           style={{
-            width: "300px",
-            height: "200px",
-            border: "4px dashed #fff",
-            borderRadius: "20px",
+            width: "85%",
+            height: "40%",
+            border: "4px dashed rgba(255, 255, 255, 0.8)",
+            borderRadius: "15px",
             background: "rgba(255, 255, 255, 0.2)",
             boxShadow: "0 0 15px rgba(255, 255, 255, 0.5)",
           }}
         ></div>
-        <p style={{ color: "#fff", marginTop: "20px", textAlign: "center" }}>
-          Presiona el botón para abrir la cámara y capturar la imagen
+        <p
+          style={{
+            color: "#fff",
+            marginTop: "20px",
+            textAlign: "center",
+            fontSize: "16px",
+          }}
+        >
+          Centra tu documento dentro del marco y presiona Abrir Cámara
         </p>
       </div>
 
@@ -68,7 +76,7 @@ const CameraNative = () => {
             cursor: "pointer",
           }}
         >
-          Abrir Cámara
+          📸 Abrir Cámara
           <input
             type="file"
             accept="image/*"
@@ -97,7 +105,7 @@ const CameraNative = () => {
           <img
             src={capturedImage}
             alt="Captured"
-            style={{ maxWidth: "80%", maxHeight: "80%" }}
+            style={{ maxWidth: "80%", maxHeight: "80%", borderRadius: "10px" }}
           />
           <button
             onClick={() => setCapturedImage(null)}
