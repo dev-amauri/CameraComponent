@@ -8,9 +8,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Typography> Libreria </Typography>
-       <CameraOverlay/> 
-       <Typography> Nativo </Typography>
+       <Typography> Camara nativa </Typography>
        <CameraNative/>
        
       </main>
