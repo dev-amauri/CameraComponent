@@ -1,12 +1,17 @@
 import Image from "next/image";
 import styles from "./page.module.css";
-import CameraOverlay from "@/components/CameraCapture";
+import CameraNative from "@/components/CameraNative";
+import CameraOverlay from "@/components/CameraOverlay";
+import { Typography } from "@mui/material";
 
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-       <CameraOverlay/>
+        <Typography> Libreria </Typography>
+       <CameraOverlay/> 
+       <Typography> Nativo </Typography>
+       <CameraNative/>
        
       </main>
       <footer className={styles.footer}>
