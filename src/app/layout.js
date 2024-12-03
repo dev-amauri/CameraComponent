@@ -1,3 +1,7 @@
+
+import BottomNavigationMenu from '@/components/navigation/BottomNavigationMenu';
+import Navbar from '@/components/navigation/navbar'; 
+
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -27,7 +31,9 @@ export default function RootLayout({ children }) {
         ></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Navbar/>
         {children}
+        <BottomNavigationMenu />
       </body>
     </html>
   );
