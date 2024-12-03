@@ -1,18 +1,21 @@
 import Image from "next/image";
 import styles from "./page.module.css";
-import CameraNative from "@/components/CameraNative";
-import CameraOverlay from "@/components/CameraOverlay";
+import CameraNative from "@/components/camera/CameraNative";
+import CameraOverlay from "@/components/camera/CameraOverlay";
+import LoadingScreen from "@/components/loading_screens/LoadingScreen";
 import { Typography } from "@mui/material";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-       <Typography> Camara nativa </Typography>
-       <CameraNative/>
+    <div >
+      <main >
+
+        <LoadingScreen/>
+       {/* <Typography> Camara nativa </Typography>
+       <CameraNative/> */}
        
       </main>
-      <footer className={styles.footer}>
+      {/* <footer className={styles.footer}>
         <a
           href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
           target="_blank"
@@ -55,7 +58,7 @@ export default function Home() {
           />
           Go to nextjs.org →
         </a>
-      </footer>
+      </footer> */}
     </div>
   );
 }

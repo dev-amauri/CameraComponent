@@ -1,0 +1,58 @@
+/* Contenedor principal */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Textos */
+.textContainer {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    bottom: 20px; /* Posición desde la parte inferior */
+    left: 50%; /* Centra horizontalmente */
+    transform: translateX(-50%); /* Ajusta para centrar */
+}
+
+.text {
+    color: #0f0e0e; /* Color de texto (blanco) */
+    font-size: 0.8rem; /* Ajusta el tamaño de fuente */
+    text-align: center;
+}
+
+.textSpan {
+    color: var(--primary-orange);
+    font-weight: bold;
+}
+
+/* Imagen del logo */
+.logo {
+    width: 150px;
+    height: auto;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Animación de pulso */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
