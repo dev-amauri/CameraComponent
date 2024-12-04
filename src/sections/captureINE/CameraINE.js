@@ -47,22 +47,42 @@ export default function CameraINE() {
     const canvas = canvasRef.current;
     const video = videoRef.current;
 
-    // Ajusta el tamaño del canvas a la resolución deseada
-    canvas.width = video.videoWidth; // Mantén la resolución del video
+    // Ajusta el tamaño del canvas a la resolución del video
+    canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Dibuja el fotograma actual en el canvas
     const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Obtén la imagen en alta calidad
-    const image = canvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
-    console.log('Fotografía capturada:', image);
+    // Definir las coordenadas y dimensiones del recorte (ajústalas según tu marco punteado)
+    const cropX = canvas.width * 0.25; // 25% desde la izquierda
+    const cropY = canvas.height * 0.25; // 25% desde arriba
+    const cropWidth = canvas.width * 0.5; // 50% del ancho total
+    const cropHeight = canvas.height * 0.5; // 50% de la altura total
 
-    // Descarga automáticamente la imagen capturada
+    // Crear un nuevo canvas para el recorte
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = cropWidth;
+    croppedCanvas.height = cropHeight;
+
+    const croppedContext = croppedCanvas.getContext('2d');
+    croppedContext.drawImage(
+      canvas,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
+      0,
+      0,
+      cropWidth,
+      cropHeight
+    );
+
+    // Descargar la imagen recortada
+    const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
     const link = document.createElement('a');
-    link.href = image;
-    link.download = `captura_${new Date().toISOString()}.jpeg`;
+    link.href = croppedImage;
+    link.download = `recorte_${new Date().toISOString()}.jpeg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -105,3 +125,4 @@ export default function CameraINE() {
     </div>
   );
 }
+

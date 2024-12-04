@@ -33,7 +33,7 @@
 .cameraFrame {
     position: absolute;
     width: 88%;
-    height: 85%;
+    height: 84%;
     background: transparent;
     border: 4px dashed rgba(255, 255, 255, 0.8);
     border-radius: 20px;
