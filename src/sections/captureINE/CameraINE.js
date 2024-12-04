@@ -56,9 +56,9 @@ export default function CameraINE() {
 
     // Definir las coordenadas y dimensiones del recorte (ajústalas según tu marco punteado)
     const cropX = canvas.width * 0.25; // 25% desde la izquierda
-    const cropY = canvas.height * 0.25; // 25% desde arriba
-    const cropWidth = canvas.width * 0.5; // 50% del ancho total
-    const cropHeight = canvas.height * 0.5; // 50% de la altura total
+    const cropY = canvas.height * 0.10; // 25% desde arriba
+    const cropWidth = canvas.width * 0.05; // 50% del ancho total
+    const cropHeight = canvas.height * 0.50; // 50% de la altura total
 
     // Crear un nuevo canvas para el recorte
     const croppedCanvas = document.createElement('canvas');
