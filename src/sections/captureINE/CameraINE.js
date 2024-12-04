@@ -7,6 +7,7 @@ import styles from './CameraINE.module.css';
 export default function CameraINE() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const croppedCanvasRef = useRef(null); // Canvas para mostrar el recorte
   const [isCameraActive, setIsCameraActive] = useState(false);
 
   // Estados para los parámetros de recorte
@@ -48,12 +49,12 @@ export default function CameraINE() {
   }, []);
 
   const capturePhoto = () => {
-    if (!canvasRef.current || !videoRef.current) return;
+    if (!canvasRef.current || !videoRef.current || !croppedCanvasRef.current) return;
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
 
-    // Ajusta el tamaño del canvas a la resolución del video
+    // Ajusta el tamaño del canvas al tamaño del video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
@@ -66,14 +67,8 @@ export default function CameraINE() {
     const cropW = canvas.width * cropWidth;
     const cropH = canvas.height * cropHeight;
 
-    // Dibuja el rectángulo rojo en el canvas para mostrar el área de recorte
-    context.strokeStyle = 'red';
-    context.lineWidth = 3;
-    context.strokeRect(cropStartX, cropStartY, cropW, cropH);
-
-    // Código de recorte (comentado para pruebas)
-    /*
-    const croppedCanvas = document.createElement('canvas');
+    // Canvas secundario para mostrar el recorte
+    const croppedCanvas = croppedCanvasRef.current;
     croppedCanvas.width = cropW;
     croppedCanvas.height = cropH;
 
@@ -90,14 +85,10 @@ export default function CameraINE() {
       cropH
     );
 
-    const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
-    const link = document.createElement('a');
-    link.href = croppedImage;
-    link.download = `recorte_${new Date().toISOString()}.jpeg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    */
+    // Dibuja el área de recorte en rojo en el canvas principal
+    context.strokeStyle = 'red';
+    context.lineWidth = 3;
+    context.strokeRect(cropStartX, cropStartY, cropW, cropH);
   };
 
   return (
@@ -145,6 +136,14 @@ export default function CameraINE() {
       <div className={styles.cameraContainer}>
         <video ref={videoRef} autoPlay playsInline className={styles.cameraVideo} />
         <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <canvas
+          ref={croppedCanvasRef}
+          style={{
+            border: '2px solid black',
+            marginTop: '10px',
+            display: 'block',
+          }}
+        />
         <div
           style={{
             position: 'absolute',
