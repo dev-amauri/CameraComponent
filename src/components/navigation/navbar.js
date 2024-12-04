@@ -29,6 +29,8 @@ export default function Navbar() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 boxShadow: '0px -2px 10px rgba(0, 0, 0, 0.1)',
+                background:'white',
+                zIndex:3,
             }}
         >
             <img src='/Logos/logoEsigen.png' alt='immage_logo' style={{ width: '120px', height: 'auto', transform: 'scale(0.8)', cursor: 'pointer' }} onClick={handleNavigationLogo} />

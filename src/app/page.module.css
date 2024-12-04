@@ -4,13 +4,14 @@
   color: var(--secondary-blue);
   display: flex;
   justify-content: center;
+  padding: 80px 0px;
 }
 
 .containerColor {
   background: linear-gradient(135deg, rgba(104, 205, 249, 0.2), rgba(3, 81, 171, 0.2));
   padding: 20px;
   width: 90%;
-  height: auto;
+  height: min-content;
   border-radius: 20px;
   display: flex;
   gap: 30px;
@@ -35,10 +36,6 @@
 
 @media (max-width: 980px) {
 
-  .containerColor {
-    flex-direction: column;
-  }
-  
   .title {
     font-size: 1.3rem;
   }
@@ -50,5 +47,13 @@
   .image{
     height: 150px;
   }
+}
+
+@media (max-width: 500px) {
+
+  .containerColor {
+    flex-direction: column;
+  }
+  
 }
 
