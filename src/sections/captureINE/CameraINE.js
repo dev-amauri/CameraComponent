@@ -7,14 +7,7 @@ import styles from './CameraINE.module.css';
 export default function CameraINE() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const croppedCanvasRef = useRef(null); // Canvas para mostrar el recorte
   const [isCameraActive, setIsCameraActive] = useState(false);
-
-  // Estados para los parámetros de recorte
-  const [cropX, setCropX] = useState(0.1);
-  const [cropY, setCropY] = useState(0.1);
-  const [cropWidth, setCropWidth] = useState(0.8);
-  const [cropHeight, setCropHeight] = useState(0.8);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -49,101 +42,67 @@ export default function CameraINE() {
   }, []);
 
   const capturePhoto = () => {
-    if (!canvasRef.current || !videoRef.current || !croppedCanvasRef.current) return;
+    if (!canvasRef.current || !videoRef.current) return;
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
 
-    // Ajusta el tamaño del canvas al tamaño del video
+    // Ajusta el tamaño del canvas a la resolución del video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
     const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Calcula las coordenadas y dimensiones del área de recorte
-    const cropStartX = canvas.width * cropX;
-    const cropStartY = canvas.height * cropY;
-    const cropW = canvas.width * cropWidth;
-    const cropH = canvas.height * cropHeight;
+    // Definir las coordenadas y dimensiones del recorte (ajústalas según tu marco punteado)
+    const cropX = canvas.width * 0.1; // 25% desde la izquierda
+    const cropY = canvas.height * 0.1; // 25% desde arriba
+    const cropWidth = canvas.width * 0.8; // 50% del ancho total
+    const cropHeight = canvas.height * 0.8; // 50% de la altura total
 
-    // Canvas secundario para mostrar el recorte
-    const croppedCanvas = croppedCanvasRef.current;
-    croppedCanvas.width = cropW;
-    croppedCanvas.height = cropH;
+    // Crear un nuevo canvas para el recorte
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = cropWidth;
+    croppedCanvas.height = cropHeight;
 
     const croppedContext = croppedCanvas.getContext('2d');
     croppedContext.drawImage(
       canvas,
-      cropStartX,
-      cropStartY,
-      cropW,
-      cropH,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      cropW,
-      cropH
+      cropWidth,
+      cropHeight
     );
 
-    // Dibuja el área de recorte en rojo en el canvas principal
-    context.strokeStyle = 'red';
-    context.lineWidth = 3;
-    context.strokeRect(cropStartX, cropStartY, cropW, cropH);
+    // Descargar la imagen recortada
+    const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
+    const link = document.createElement('a');
+    link.href = croppedImage;
+    link.download = `recorte_${new Date().toISOString()}.jpeg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.controls}>
-        {/* Inputs para ajustar los valores de recorte */}
-        <label>
-          Crop X (%):
-          <input
-            type="number"
-            step="0.01"
-            value={cropX}
-            onChange={(e) => setCropX(Number(e.target.value))}
-          />
-        </label>
-        <label>
-          Crop Y (%):
-          <input
-            type="number"
-            step="0.01"
-            value={cropY}
-            onChange={(e) => setCropY(Number(e.target.value))}
-          />
-        </label>
-        <label>
-          Crop Width (%):
-          <input
-            type="number"
-            step="0.01"
-            value={cropWidth}
-            onChange={(e) => setCropWidth(Number(e.target.value))}
-          />
-        </label>
-        <label>
-          Crop Height (%):
-          <input
-            type="number"
-            step="0.01"
-            value={cropHeight}
-            onChange={(e) => setCropHeight(Number(e.target.value))}
-          />
-        </label>
-      </div>
-
       <div className={styles.cameraContainer}>
-        <video ref={videoRef} autoPlay playsInline className={styles.cameraVideo} />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-        <canvas
-          ref={croppedCanvasRef}
-          style={{
-            border: '2px solid black',
-            marginTop: '10px',
-            display: 'block',
-          }}
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className={styles.cameraVideo}
         />
+
+        {/* Overlay */}
+        <div className={styles.cameraOverlay}>
+          <div className={styles.cameraFrame}></div>
+        </div>
+
         <div
           style={{
             position: 'absolute',
@@ -160,7 +119,10 @@ export default function CameraINE() {
             <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
           </IconButton>
         </div>
+
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
     </div>
   );
 }
+
