@@ -71,37 +71,34 @@ export default function CameraINE() {
   return (
     <div className={styles.container}>
       <div className={styles.cameraContainer}>
-        <div style={{position:'relative'}}>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className={styles.cameraVideo}
-          />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className={styles.cameraVideo}
+        />
 
-          {/* Overlay */}
-          <div className={styles.cameraOverlay}>
-            <div className={styles.cameraFrame}></div>
-          </div>
-
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 40,
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <IconButton
-              onClick={capturePhoto}
-              disabled={!isCameraActive}
-              sx={{ backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-            >
-              <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
-            </IconButton>
-          </div>
+        {/* Overlay */}
+        <div className={styles.cameraOverlay}>
+          <div className={styles.cameraFrame}></div>
         </div>
 
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 40,
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <IconButton
+            onClick={capturePhoto}
+            disabled={!isCameraActive}
+            sx={{ backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+          >
+            <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
+          </IconButton>
+        </div>
 
         <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
