@@ -2,13 +2,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongRounded';
-import styles from './CameraINE.module.css'
+import styles from './CameraINE.module.css';
 
 export default function CameraINE() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [capturedImage, setCapturedImage] = useState(null);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -56,8 +55,15 @@ export default function CameraINE() {
 
     // Obtén la imagen en alta calidad
     const image = canvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
-    setCapturedImage(image);
     console.log('Fotografía capturada:', image);
+
+    // Descarga automáticamente la imagen capturada
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = `captura_${new Date().toISOString()}.jpeg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -91,28 +97,6 @@ export default function CameraINE() {
             <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: '#000' }} />
           </IconButton>
         </div>
-
-        {capturedImage && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <img
-              src={capturedImage}
-              alt="Fotografía capturada"
-              style={{ maxWidth: '90%', maxHeight: '90%' }}
-            />
-          </div>
-        )}
 
         <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
