@@ -1,5 +1,7 @@
 'use client';
 import React, { useRef, useEffect, useState } from 'react';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import * as tf from '@tensorflow/tfjs';
 import IconButton from '@mui/material/IconButton';
 import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongRounded';
 import styles from './CameraINE.module.css';
@@ -8,23 +10,17 @@ export default function CameraOpenCV() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [opencvLoaded, setOpenCVLoaded] = useState(false);
+  const [model, setModel] = useState(null);
 
   useEffect(() => {
-    // Espera a que OpenCV se cargue
-    const checkOpenCV = () => {
-      if (window.cv) {
-        console.log('OpenCV.js cargado correctamente.');
-        setOpenCVLoaded(true);
-      } else {
-        setTimeout(checkOpenCV, 100);
-      }
+    // Carga el modelo de detección
+    const loadModel = async () => {
+      const loadedModel = await cocoSsd.load();
+      console.log('Modelo Coco-SSD cargado');
+      setModel(loadedModel);
     };
-    checkOpenCV();
-  }, []);
 
-  useEffect(() => {
-    if (!opencvLoaded) return;
+    loadModel();
 
     const startCamera = async () => {
       try {
@@ -53,77 +49,48 @@ export default function CameraOpenCV() {
         tracks.forEach((track) => track.stop());
       }
     };
-  }, [opencvLoaded]);
+  }, []);
 
-  const detectRectangle = (imageData) => {
-    const src = cv.matFromImageData(imageData);
-    const gray = new cv.Mat();
-    const edges = new cv.Mat();
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
-    cv.Canny(gray, edges, 50, 150);
+  const detectObjects = async () => {
+    if (!model || !videoRef.current) return;
 
-    // Encuentra contornos
-    const contours = new cv.MatVector();
-    const hierarchy = new cv.Mat();
-    cv.findContours(edges, contours, hierarchy, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
-
-    let rect = null;
-    for (let i = 0; i < contours.size(); i++) {
-      const contour = contours.get(i);
-      const approx = new cv.Mat();
-      cv.approxPolyDP(contour, approx, 0.02 * cv.arcLength(contour, true), true);
-
-      if (approx.rows === 4) {
-        const boundingRect = cv.boundingRect(approx);
-        if (!rect || boundingRect.width * boundingRect.height > rect.width * rect.height) {
-          rect = boundingRect; // Rectángulo más grande encontrado
-        }
-      }
-      approx.delete();
-    }
-
-    src.delete();
-    gray.delete();
-    edges.delete();
-    contours.delete();
-    hierarchy.delete();
-
-    return rect;
-  };
-
-  const capturePhoto = () => {
-    if (!canvasRef.current || !videoRef.current) return;
-
-    const canvas = canvasRef.current;
     const video = videoRef.current;
+    const predictions = await model.detect(video);
 
-    // Ajusta el tamaño del canvas al tamaño del video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Obtén la imagen y detecta el rectángulo
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const rect = detectRectangle(imageData);
+    // Encuentra el rectángulo más relevante (si existe)
+    const rect = predictions.find(
+      (p) => p.class === 'person' || p.class === 'rectangle'
+    );
 
     if (rect) {
-      const croppedCanvas = document.createElement('canvas');
-      croppedCanvas.width = rect.width;
-      croppedCanvas.height = rect.height;
+      console.log('Rectángulo detectado:', rect);
 
+      // Dibuja el rectángulo en el canvas
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      context.strokeStyle = 'red';
+      context.lineWidth = 2;
+      context.strokeRect(rect.bbox[0], rect.bbox[1], rect.bbox[2], rect.bbox[3]);
+
+      // Recorta y guarda la imagen
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = rect.bbox[2];
+      croppedCanvas.height = rect.bbox[3];
       const croppedContext = croppedCanvas.getContext('2d');
       croppedContext.drawImage(
         canvas,
-        rect.x,
-        rect.y,
-        rect.width,
-        rect.height,
+        rect.bbox[0],
+        rect.bbox[1],
+        rect.bbox[2],
+        rect.bbox[3],
         0,
         0,
-        rect.width,
-        rect.height
+        rect.bbox[2],
+        rect.bbox[3]
       );
 
       const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0);
@@ -141,7 +108,12 @@ export default function CameraOpenCV() {
   return (
     <div className={styles.container}>
       <div className={styles.cameraContainer}>
-        <video ref={videoRef} autoPlay playsInline className={styles.cameraVideo} />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className={styles.cameraVideo}
+        />
         <canvas ref={canvasRef} style={{ display: 'none' }} />
         <div
           style={{
@@ -152,8 +124,8 @@ export default function CameraOpenCV() {
           }}
         >
           <IconButton
-            onClick={capturePhoto}
-            disabled={!isCameraActive || !opencvLoaded}
+            onClick={detectObjects}
+            disabled={!isCameraActive || !model}
             sx={{ backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
           >
             <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: '#000' }} />
