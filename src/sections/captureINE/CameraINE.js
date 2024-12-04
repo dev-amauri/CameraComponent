@@ -16,6 +16,8 @@ export default function CameraINE() {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' }, // Cámara trasera
+            width: { ideal: 1920 }, // Ancho ideal
+            height: { ideal: 1080 }, // Altura ideal
           },
           audio: false, // Desactiva el audio
         });
@@ -45,8 +47,8 @@ export default function CameraINE() {
     const canvas = canvasRef.current;
     const video = videoRef.current;
 
-    // Ajusta el tamaño del canvas al tamaño nativo del video
-    canvas.width = video.videoWidth;
+    // Ajusta el tamaño del canvas a la resolución deseada
+    canvas.width = video.videoWidth; // Mantén la resolución del video
     canvas.height = video.videoHeight;
 
     // Dibuja el fotograma actual en el canvas
