@@ -13,10 +13,14 @@ import { QRCodeCanvas } from "qrcode.react";
 import { ineMockData } from "./dataFake";
 import { LoadingButton } from "@mui/lab";
 
+import useStore from "./hooks/useStore";
+
 export const FormDataINE = () => {
     const [qrData, setQrData] = useState("");
     const [data, setData] = useState("");
     const [open, setOpen] = useState(false);
+
+    const {setActiveComponent } = useStore();
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -24,6 +28,10 @@ export const FormDataINE = () => {
 
     const handleClose = () => {
         setOpen(false);
+    };
+
+    const handleBackCamera = () => {
+        setActiveComponent(false);
     };
 
     // Yup schema
@@ -137,7 +145,7 @@ export const FormDataINE = () => {
                     <LoadingButton type="submit" loading={isSubmitting} startIcon={<QrCodeIcon />} variant="contained" color="success" sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '1rem' }}>
                         Generar QR
                     </LoadingButton>
-                    <Button variant="contained" color="error" sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '1rem' }}>
+                    <Button variant="contained" color="error" sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '1rem' }} onClick={handleBackCamera}>
                         Cancelar
                     </Button>
                 </Box>

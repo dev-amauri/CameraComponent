@@ -3,11 +3,15 @@ import React, { useRef, useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongRounded';
 import styles from './CameraINE.module.css';
+import { FormDataINE } from "@/sections/captureINE/FormDataINE";
+import useStore from './hooks/useStore';
 
 export default function CameraINE() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const { activeComponent, setActiveComponent } = useStore();
+
 
   useEffect(() => {
     const startCamera = async () => {
@@ -84,43 +88,56 @@ export default function CameraINE() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setActiveComponent(true);
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.cameraContainer}>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className={styles.cameraVideo}
-        />
+    <>
+      {!activeComponent &&
+        <div className={styles.container}>
+          <div className={styles.cameraContainer}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className={styles.cameraVideo}
+            />
 
-        {/* Overlay */}
-        <div className={styles.cameraOverlay}>
-          <div className={styles.cameraFrame}></div>
+            {/* Overlay */}
+            <div className={styles.cameraOverlay}>
+              <div className={styles.cameraFrame}></div>
+            </div>
+
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 40,
+                left: '50%',
+                transform: 'translateX(-50%)',
+              }}
+            >
+              <IconButton
+                variant="contained"
+                onClick={capturePhoto}
+                disabled={!isCameraActive}
+                sx={{ backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+              >
+                <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
+              </IconButton>
+            </div>
+
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+          </div>
         </div>
+      }
 
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 40,
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
-        >
-          <IconButton
-            onClick={capturePhoto}
-            disabled={!isCameraActive}
-            sx={{ backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-          >
-            <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
-          </IconButton>
+      {activeComponent &&
+        <div>
+          <FormDataINE />
         </div>
+      }
+    </>
 
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-      </div>
-    </div>
   );
 }
 
