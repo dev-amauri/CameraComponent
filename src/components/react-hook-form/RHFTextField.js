@@ -13,7 +13,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '&.Mui-error': {
-            fontSize:'0.8rem',
+            fontSize: '0.8rem',
           },
         },
       },
@@ -46,6 +46,9 @@ const RHFTextField = React.forwardRef(({ name, ...other }, ref) => {
     </ThemeProvider>
   );
 });
+
+// Agrega el displayName
+RHFTextField.displayName = 'RHFTextField';
 
 RHFTextField.propTypes = {
   name: PropTypes.string,
