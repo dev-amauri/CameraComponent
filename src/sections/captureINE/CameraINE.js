@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongRounded';
+import { usePathname } from 'next/navigation';
 import styles from './CameraINE.module.css';
 import { FormDataINE } from "@/sections/captureINE/FormDataINE";
 import useStore from './hooks/useStore';
@@ -11,18 +12,26 @@ export default function CameraINE() {
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const { activeComponent, setActiveComponent } = useStore();
+  const pathname = usePathname();
 
+  // Reinicia el estado y la cámara cuando cambia la ruta
+  useEffect(() => {
+    if (!pathname?.endsWith('/inedata'))  {
+      setActiveComponent(false); // Reinicia el estado cuando la ruta es '/inedata'
+    }
+  }, [pathname, setActiveComponent]);
 
+  // Inicia o reinicia la cámara
   useEffect(() => {
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' }, // Cámara trasera
-            width: { ideal: 1920 }, // Ancho ideal
-            height: { ideal: 1080 }, // Altura ideal
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
           },
-          audio: false, // Desactiva el audio
+          audio: false,
         });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -33,7 +42,9 @@ export default function CameraINE() {
       }
     };
 
-    startCamera();
+    if (!activeComponent) {
+      startCamera();
+    }
 
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
@@ -41,7 +52,7 @@ export default function CameraINE() {
         tracks.forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [activeComponent]);
 
   const capturePhoto = () => {
     if (!canvasRef.current || !videoRef.current) return;
@@ -56,13 +67,12 @@ export default function CameraINE() {
     const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Definir las coordenadas y dimensiones del recorte (ajústalas según tu marco punteado)
-    const cropX = canvas.width * 0.1; // 25% desde la izquierda
-    const cropY = canvas.height * 0.1; // 25% desde arriba
-    const cropWidth = canvas.width * 0.8; // 50% del ancho total
-    const cropHeight = canvas.height * 0.8; // 50% de la altura total
+    // Recorta la imagen
+    const cropX = canvas.width * 0.1;
+    const cropY = canvas.height * 0.1;
+    const cropWidth = canvas.width * 0.8;
+    const cropHeight = canvas.height * 0.8;
 
-    // Crear un nuevo canvas para el recorte
     const croppedCanvas = document.createElement('canvas');
     croppedCanvas.width = cropWidth;
     croppedCanvas.height = cropHeight;
@@ -80,20 +90,22 @@ export default function CameraINE() {
       cropHeight
     );
 
-    // Descargar la imagen recortada
-    const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
+    // Descarga la imagen
+    const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0);
     const link = document.createElement('a');
     link.href = croppedImage;
     link.download = `recorte_${new Date().toISOString()}.jpeg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // Cambia al componente FormDataINE
     setActiveComponent(true);
   };
 
   return (
     <>
-      {!activeComponent &&
+      {!activeComponent && (
         <div className={styles.container}>
           <div className={styles.cameraContainer}>
             <video
@@ -102,11 +114,10 @@ export default function CameraINE() {
               playsInline
               className={styles.cameraVideo}
             />
-
-            {/* Overlay */}
             <div className={styles.cameraOverlay}>
               <div className={styles.cameraFrame}></div>
             </div>
+
 
             <div
               style={{
@@ -126,18 +137,19 @@ export default function CameraINE() {
               </IconButton>
             </div>
 
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
           </div>
-        </div>
-      }
 
-      {activeComponent &&
-        <div>
+        </div>
+      )}
+
+      {activeComponent && (
+        <div style={{ marginTop: '2rem' }}>
           <FormDataINE />
+          <button onClick={() => setActiveComponent(false)}>Regresar a la cámara</button>
         </div>
-      }
-    </>
+      )}
 
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+    </>
   );
 }
-
