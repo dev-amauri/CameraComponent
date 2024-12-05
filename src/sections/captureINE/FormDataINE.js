@@ -5,15 +5,28 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import FormProvider from "@/components/react-hook-form/FormProvider";
 import RHFTextField from "@/components/react-hook-form/RHFTextField";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Dialog } from "@mui/material";
 import QrCodeIcon from '@mui/icons-material/QrCode';
-import {QRCodeCanvas} from "qrcode.react";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
+import { QRCodeCanvas } from "qrcode.react";
 import { ineMockData } from "./dataFake";
 import { LoadingButton } from "@mui/lab";
 
 export const FormDataINE = () => {
     const [qrData, setQrData] = useState("");
+    const [data, setData] = useState("");
+    const [open, setOpen] = useState(false);
+
+    console.log({ data })
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     // Yup schema
     const Schema = yup.object().shape({
@@ -72,9 +85,11 @@ export const FormDataINE = () => {
     }, [setValue]);
 
     const onSubmit = async (data) => {
-        console.log("Datos del formulario:", data);
         const jsonData = encodeURIComponent(JSON.stringify(data));
+        const decodedData = JSON.parse(decodeURIComponent(jsonData));
         setQrData(jsonData);
+        setData(decodedData);
+        handleClickOpen();
     };
 
     // Styles
@@ -130,12 +145,31 @@ export const FormDataINE = () => {
                 </Box>
             </FormProvider>
 
-            {qrData && (
-                <Box sx={{ marginTop: '20px', textAlign: 'center' }}>
-                    <Typography sx={{ marginBottom: '10px', fontWeight: 'bold' }}>Escanea para compartir:</Typography>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+            >
+                <Box sx={{ padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <Typography sx={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '1.2rem' }}>Escanea para compartir:</Typography>
                     <QRCodeCanvas value={qrData} size={200} />
+                    <Box sx={{
+                        marginTop: '10px',
+                        padding: '10px',
+                        background: 'linear-gradient(135deg, rgba(104, 205, 249, 0.2), rgba(3, 81, 171, 0.2))',
+                        borderRadius: '10px',
+                        color: 'var(--secondary-blue)',
+                        border: '1px solid var(--secondary-blue)',
+                        display:'flex',
+                        gap:'10px',
+                        justifyContecnt:'center',
+                    }}>
+                        <InfoOutlinedIcon/>
+                        <Typography sx={{ fontSize: '1rem' }}>Por seguridad, no compartas estos datos con terceros.</Typography>
+                    </Box>
+
                 </Box>
-            )}
+
+            </Dialog>
         </div >
     );
 };
