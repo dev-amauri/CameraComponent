@@ -7,17 +7,13 @@ import FormProvider from "@/components/react-hook-form/FormProvider";
 import RHFTextField from "@/components/react-hook-form/RHFTextField";
 import { Box, Typography, Button } from "@mui/material";
 import QrCodeIcon from '@mui/icons-material/QrCode';
-import { QRCodeCanvas } from "qrcode.react";
+import {QRCodeCanvas} from "qrcode.react";
 
 import { ineMockData } from "./dataFake";
 import { LoadingButton } from "@mui/lab";
 
-import { Html5QrcodeScanner } from 'html5-qrcode';
-
-
 export const FormDataINE = () => {
     const [qrData, setQrData] = useState("");
-    const [scannedData, setScannedData] = useState('');
 
     // Yup schema
     const Schema = yup.object().shape({
@@ -90,22 +86,6 @@ export const FormDataINE = () => {
         }
     };
 
-
-    const scanQrCode = () => {
-        const scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 });
-
-        scanner.render(
-            (decodedText) => {
-                const originalData = JSON.parse(decodeURIComponent(decodedText));
-                console.log('Datos escaneados:', originalData);
-                setScannedData(originalData);
-                scanner.clear();
-            },
-            (error) => {
-                console.error('Error al escanear:', error);
-            }
-        );
-    };
     return (
         <div style={{ width: '100%', height: '100%', padding: '80px 20px' }}>
             <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -154,22 +134,6 @@ export const FormDataINE = () => {
                 <Box sx={{ marginTop: '20px', textAlign: 'center' }}>
                     <Typography sx={{ marginBottom: '10px', fontWeight: 'bold' }}>Escanea para compartir:</Typography>
                     <QRCodeCanvas value={qrData} size={200} />
-                </Box>
-            )}
-
-            <Button
-                onClick={scanQrCode}
-                variant="contained"
-                color="primary"
-                sx={{ marginTop: '20px' }}
-            >
-                Escanear QR
-            </Button>
-            <div id="reader" style={{ marginTop: '20px' }}></div>
-            {scannedData && (
-                <Box sx={{ marginTop: '20px' }}>
-                    <Typography>Datos escaneados:</Typography>
-                    <pre>{JSON.stringify(scannedData, null, 2)}</pre>
                 </Box>
             )}
         </div >
