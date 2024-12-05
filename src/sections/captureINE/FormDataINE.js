@@ -18,8 +18,6 @@ export const FormDataINE = () => {
     const [data, setData] = useState("");
     const [open, setOpen] = useState(false);
 
-    console.log({ data })
-
     const handleClickOpen = () => {
         setOpen(true);
     };

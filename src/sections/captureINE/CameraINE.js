@@ -12,7 +12,6 @@ export default function CameraINE() {
   useEffect(() => {
     const startCamera = async () => {
       try {
-        console.log('Iniciando cámara...');
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' }, // Cámara trasera
@@ -24,7 +23,6 @@ export default function CameraINE() {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsCameraActive(true);
-          console.log('Cámara activada con éxito.');
         }
       } catch (error) {
         console.error('Error al acceder a la cámara:', error);
