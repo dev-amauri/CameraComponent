@@ -18,9 +18,13 @@ const ClientLayout = ({ children }) => {
     return () => clearTimeout(timeout); // Limpia el timeout
   }, [pathname]);
 
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <>
-      {loading && <LoadingScreen />}
       <Navbar/>
       {children}
       <BottomNavigationMenu />
