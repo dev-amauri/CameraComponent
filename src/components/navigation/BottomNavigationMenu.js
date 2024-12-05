@@ -48,6 +48,7 @@ export default function BottomNavigationMenu() {
         position: 'fixed',
         bottom: 0,
         boxShadow: '0px -2px 10px rgba(0, 0, 0, 0.1)',
+        zIndex:3,
       }}
     >
       <BottomNavigation value={value} onChange={handleNavigation}>
