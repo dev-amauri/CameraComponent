@@ -6,7 +6,13 @@ import LoadingScreen from '@/components/loading_screens/LoadingScreen'; // Ruta 
 import BottomNavigationMenu from '@/components/navigation/BottomNavigationMenu';
 import Navbar from '@/components/navigation/navbar';
 
+// React Query
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+
 const ClientLayout = ({ children }) => {
+  const [queryClient] = useState(() => new QueryClient());
+
   const [loading, setLoading] = useState(true);
 
   const pathname = usePathname(); // Detecta el cambio de ruta
@@ -24,12 +30,11 @@ const ClientLayout = ({ children }) => {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Navbar/>
       {children}
       <BottomNavigationMenu />
-
-    </>
+    </QueryClientProvider>
   );
 };
 

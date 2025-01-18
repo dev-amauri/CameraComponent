@@ -5,21 +5,37 @@ import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongR
 import { usePathname } from 'next/navigation';
 import styles from './CameraINE.module.css';
 import { FormDataINE } from "@/sections/captureINE/FormDataINE";
+
+// hooks
 import useStore from './hooks/useStore';
+import useMutationOCR from "./hooks/useMutationOCR";
+
 
 export default function CameraINE() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const { activeComponent, setActiveComponent } = useStore();
+  const { activeComponent, setActiveComponent, dataINE, setDataINE } = useStore();
   const pathname = usePathname();
+
+  console.log(dataINE)
+  // mutation
+  const mutations = useMutationOCR();
+
 
   // Reinicia el estado y la cámara cuando cambia la ruta
   useEffect(() => {
-    if (!pathname?.endsWith('/inedata'))  {
+    if (!pathname?.endsWith('/inedata')) {
       setActiveComponent(false); // Reinicia el estado cuando la ruta es '/inedata'
     }
   }, [pathname, setActiveComponent]);
+
+  // Si hay datos en dataINE, se activa el formulario
+  useEffect(() => {
+    if (dataINE !== null) {
+      setActiveComponent(true)
+    }
+  }, [dataINE])
 
   // Inicia o reinicia la cámara
   useEffect(() => {
@@ -27,7 +43,7 @@ export default function CameraINE() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: { exact: 'environment' }, // Cámara trasera
+            // facingMode: { exact: 'environment' }, // Cámara trasera
             width: { ideal: 1920 },
             height: { ideal: 1080 },
           },
@@ -53,6 +69,17 @@ export default function CameraINE() {
       }
     };
   }, [activeComponent]);
+
+  // Subir imagen
+  const handleSubmitImage = async (imagen) => {
+    const formData = new FormData()
+    formData.append("image", imagen || '')
+    const data = await mutations.OCR.post.mutateAsync(formData)
+    setDataINE(data)
+
+  };
+
+  // capturar imagen
 
   const capturePhoto = () => {
     if (!canvasRef.current || !videoRef.current) return;
@@ -90,18 +117,16 @@ export default function CameraINE() {
       cropHeight
     );
 
-    // Descarga la imagen
-    const croppedImage = croppedCanvas.toDataURL('image/jpeg', 1.0);
-    const link = document.createElement('a');
-    link.href = croppedImage;
-    link.download = `recorte_${new Date().toISOString()}.jpeg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Convierte la imagen a un blob para que pueda ser enviada en el FormData
+    croppedCanvas.toBlob((blob) => {
+      const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
 
-    // Cambia al componente FormDataINE
-    setActiveComponent(true);
+      // Pasa el archivo a la función handleSubmitImage
+      handleSubmitImage(file);
+    }, 'image/jpeg', 1.0);
   };
+
+
 
   return (
     <>

@@ -13,6 +13,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { ineMockData } from "./dataFake";
 import { LoadingButton } from "@mui/lab";
 
+// hooks
 import useStore from "./hooks/useStore";
 
 export const FormDataINE = () => {
@@ -20,6 +21,7 @@ export const FormDataINE = () => {
     const [data, setData] = useState("");
     const [open, setOpen] = useState(false);
 
+    // Estados globales
     const {setActiveComponent } = useStore();
 
     const handleClickOpen = () => {
