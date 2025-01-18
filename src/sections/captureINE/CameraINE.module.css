@@ -41,6 +41,10 @@
     animation: borderAnimation 2s infinite;
 }
 
+.capturedImage {
+    height: 100%;
+}
+
 /* Animación del borde */
 @keyframes borderAnimation {
     0% {

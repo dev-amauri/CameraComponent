@@ -125,7 +125,7 @@ export default function CameraINE() {
       const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
       setCapturedImage(URL.createObjectURL(file)); // Guarda la imagen capturada para mostrarla
     }, 'image/jpeg', 1.0);
-  
+
     // Convierte la imagen a un blob para que pueda ser enviada en el FormData
     croppedCanvas.toBlob((blob) => {
       const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
@@ -141,7 +141,7 @@ export default function CameraINE() {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      console.log({file})  // Establecer el archivo cargado
+      console.log({ file })  // Establecer el archivo cargado
       handleSubmitImage(file);  // Subir la imagen directamente
     }
   };
@@ -152,7 +152,7 @@ export default function CameraINE() {
       {!activeComponent && (
         <div className={styles.container}>
           <div className={styles.cameraContainer}>
-          {capturedImage ? (  // Mostrar la imagen capturada si está disponible
+            {capturedImage ? (  // Mostrar la imagen capturada si está disponible
               <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
             ) : (
               <video
@@ -197,8 +197,8 @@ export default function CameraINE() {
         </div>
       )}
 
-       {/* Campo de carga de imagen */}
-       <div>
+      {/* Campo de carga de imagen */}
+      <div>
         <input
           type="file"
           accept="image/*"
