@@ -43,7 +43,7 @@ export default function CameraINE() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            // facingMode: { exact: 'environment' }, // Cámara trasera
+            facingMode: { exact: 'environment' }, // Cámara trasera
             width: { ideal: 1920 },
             height: { ideal: 1080 },
           },
