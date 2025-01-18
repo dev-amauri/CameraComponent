@@ -18,6 +18,9 @@ export default function CameraINE() {
   const { activeComponent, setActiveComponent, dataINE, setDataINE } = useStore();
   const pathname = usePathname();
 
+  const [imageFile, setImageFile] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
+
   console.log(dataINE)
   // mutation
   const mutations = useMutationOCR();
@@ -117,15 +120,31 @@ export default function CameraINE() {
       cropHeight
     );
 
+    // Convierte la imagen completa del canvas a un blob
+    canvas.toBlob((blob) => {
+      const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
+      setCapturedImage(URL.createObjectURL(file)); // Guarda la imagen capturada para mostrarla
+    }, 'image/jpeg', 1.0);
+  
     // Convierte la imagen a un blob para que pueda ser enviada en el FormData
     croppedCanvas.toBlob((blob) => {
       const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
 
+      console.log(file)
       // Pasa el archivo a la función handleSubmitImage
       handleSubmitImage(file);
     }, 'image/jpeg', 1.0);
   };
 
+  // Manejo de carga de archivo manual
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      console.log({file})  // Establecer el archivo cargado
+      handleSubmitImage(file);  // Subir la imagen directamente
+    }
+  };
 
 
   return (
@@ -133,12 +152,16 @@ export default function CameraINE() {
       {!activeComponent && (
         <div className={styles.container}>
           <div className={styles.cameraContainer}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className={styles.cameraVideo}
-            />
+          {capturedImage ? (  // Mostrar la imagen capturada si está disponible
+              <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className={styles.cameraVideo}
+              />
+            )}
             <div className={styles.cameraOverlay}>
               <div className={styles.cameraFrame}></div>
             </div>
@@ -173,6 +196,16 @@ export default function CameraINE() {
           <button onClick={() => setActiveComponent(false)}>Regresar a la cámara</button>
         </div>
       )}
+
+       {/* Campo de carga de imagen */}
+       <div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          style={{ marginTop: '1rem' }}
+        />
+      </div>
 
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </>

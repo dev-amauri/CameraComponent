@@ -33,7 +33,7 @@ const ClientLayout = ({ children }) => {
     <QueryClientProvider client={queryClient}>
       <Navbar/>
       {children}
-      <BottomNavigationMenu />
+      {/* <BottomNavigationMenu /> */}
     </QueryClientProvider>
   );
 };

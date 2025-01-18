@@ -14,9 +14,6 @@ const useMutationOCR = () => {
     const postINE = (data) => (
         api.ocr.postOCR(data)
             .then((response) => {
-                if (response.status === 200) {
-                    console.log('Awuebo')
-                }
                 return response.data
             })
             .catch((error) => {
@@ -27,18 +24,24 @@ const useMutationOCR = () => {
                     text: '¡Ups! La imagen no tiene suficiente calidad. Intenta con una mejor.',
                     confirmButtonText: 'Aceptar'
                 });
-                return null;
+                console.error('Error:', error.message);  // Muestra el mensaje de error
+                console.error('Status Code:', error.status);  // Muestra el código de estado
+
+                // Puedes lanzar un error con el mensaje y código, o manejarlo según sea necesario
+                throw new Error(`Error ${error.status}: ${error.message}`);
+
             })
     );
+
 
     // mutates
 
     const mutatePostINE = useMutation({
         mutationFn: postINE, // Pasando la función como mutationFn
         onSuccess: () => {
-          queryClient.invalidateQueries(queryKey); // Invalidar Query y hacer refresh
+            queryClient.invalidateQueries(queryKey); // Invalidar Query y hacer refresh
         },
-      });
+    });
 
 
     return {
