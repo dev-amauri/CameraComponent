@@ -46,21 +46,16 @@ export default function CameraINE() {
   useEffect(() => {
     const startCamera = async () => {
       try {
+        // Intentamos obtener la resolución 2K
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' }, // Cámara trasera
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: 2560 },  // Resolución ideal 2K
+            height: { ideal: 1440 }, // Resolución de altura 1440
+            // Las opciones 'ideal' harán que el navegador intente conseguir la mejor resolución posible.
           },
           audio: false,
         });
-
-        // Aquí puedes verificar la orientación de la cámara
-        if (stream) {
-          const videoTrack = stream.getVideoTracks()[0];
-          const capabilities = videoTrack.getCapabilities();
-          console.log(capabilities);
-        }
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -68,6 +63,25 @@ export default function CameraINE() {
         }
       } catch (error) {
         console.error('Error al acceder a la cámara:', error);
+
+        // Si no es posible obtener 2K, intentamos con 1080p
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { exact: 'environment' }, // Cámara trasera
+              width: { ideal: 1920 },  // Resolución ideal 1080p
+              height: { ideal: 1080 },
+            },
+            audio: false,
+          });
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            setIsCameraActive(true);
+          }
+        } catch (error) {
+          console.error('Error al acceder a la cámara con 1080p:', error);
+        }
       }
     };
 
@@ -82,25 +96,6 @@ export default function CameraINE() {
       }
     };
   }, [activeComponent, capturedImage]);
-
-  useEffect(() => {
-    const handleOrientation = (event) => {
-      const { alpha, beta, gamma } = event;
-      // alpha - rotación en el eje z (0 a 360 grados)
-      // beta - inclinación hacia adelante o atrás (-180 a 180 grados)
-      // gamma - inclinación hacia los lados (-90 a 90 grados)
-
-      console.log(`Alpha: ${alpha}, Beta: ${beta}, Gamma: ${gamma}`);
-    };
-
-    // Escuchar cambios en la orientación del dispositivo
-    window.addEventListener('deviceorientation', handleOrientation);
-
-    // Limpiar el listener cuando el componente se desmonte
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-    };
-  }, []);
 
   // Subir imagen
   const handleSubmitImage = async (imagen) => {
@@ -139,16 +134,19 @@ export default function CameraINE() {
     croppedCanvas.height = cropHeight;
 
     const croppedContext = croppedCanvas.getContext('2d');
+
+    croppedContext.translate(cropHeight / 2, cropWidth / 2); // Mueve el origen al centro
+    croppedContext.rotate(-Math.PI / 2); // Rota -90 grados
     croppedContext.drawImage(
       canvas,
       cropX,
       cropY,
       cropWidth,
       cropHeight,
-      0,
-      0,
-      cropWidth,
-      cropHeight
+      -cropHeight / 2, // Centra la imagen rotada
+      -cropWidth / 2,
+      cropHeight,
+      cropWidth
     );
 
     // Convierte la imagen completa del canvas a un blob
