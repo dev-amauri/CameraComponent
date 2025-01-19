@@ -135,18 +135,16 @@ export default function CameraINE() {
 
     const croppedContext = croppedCanvas.getContext('2d');
 
-    croppedContext.translate(cropHeight / 2, cropWidth / 2); // Mueve el origen al centro
-    croppedContext.rotate(-Math.PI / 2); // Rota -90 grados
     croppedContext.drawImage(
       canvas,
       cropX,
       cropY,
       cropWidth,
       cropHeight,
-      -cropHeight / 2, // Centra la imagen rotada
-      -cropWidth / 2,
-      cropHeight,
-      cropWidth
+      0,
+      0,
+      cropWidth,
+      cropHeight
     );
 
     // Convierte la imagen completa del canvas a un blob
