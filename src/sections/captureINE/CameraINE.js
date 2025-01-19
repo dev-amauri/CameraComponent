@@ -54,6 +54,14 @@ export default function CameraINE() {
           },
           audio: false,
         });
+
+        // Aquí puedes verificar la orientación de la cámara
+        if (stream) {
+          const videoTrack = stream.getVideoTracks()[0];
+          const capabilities = videoTrack.getCapabilities();
+          console.log(capabilities);
+        }
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsCameraActive(true);
@@ -74,6 +82,25 @@ export default function CameraINE() {
       }
     };
   }, [activeComponent, capturedImage]);
+
+  useEffect(() => {
+    const handleOrientation = (event) => {
+      const { alpha, beta, gamma } = event;
+      // alpha - rotación en el eje z (0 a 360 grados)
+      // beta - inclinación hacia adelante o atrás (-180 a 180 grados)
+      // gamma - inclinación hacia los lados (-90 a 90 grados)
+
+      console.log(`Alpha: ${alpha}, Beta: ${beta}, Gamma: ${gamma}`);
+    };
+
+    // Escuchar cambios en la orientación del dispositivo
+    window.addEventListener('deviceorientation', handleOrientation);
+
+    // Limpiar el listener cuando el componente se desmonte
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+    };
+  }, []);
 
   // Subir imagen
   const handleSubmitImage = async (imagen) => {
@@ -136,6 +163,16 @@ export default function CameraINE() {
 
       // Pasa el archivo a la función handleSubmitImage
       handleSubmitImage(file);
+
+      // Crea un enlace de descarga
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'captured-image.jpg';
+      link.click();
+
+      // Libera el objeto URL después de la descarga
+      URL.revokeObjectURL(url);
     }, 'image/jpg', 1.0);
   };
 
@@ -195,7 +232,7 @@ export default function CameraINE() {
             >
 
               {isError || capturedImage ?
-                <Button variant='contained' color='inherit' onClick={changeStateError} sx={{ textTransform: 'none', fontWeight: 'bold', color:'var(--secondary-dark-blue)' }}> Reintentar </Button>
+                <Button variant='contained' color='inherit' onClick={changeStateError} sx={{ textTransform: 'none', fontWeight: 'bold', color: 'var(--secondary-dark-blue)' }}> Reintentar </Button>
                 :
                 <IconButton
                   variant="contained"

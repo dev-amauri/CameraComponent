@@ -84,3 +84,12 @@
 .loadingMessage p {
     margin-top: 10px;
 }
+
+
+
+@media (min-height: 800px) {
+    .cameraFrame {
+        width: 78%;
+        height: 68%;
+    }
+}
