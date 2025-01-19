@@ -48,7 +48,7 @@ export default function CameraINE() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: { exact: 'environment' }, // Cámara trasera
+            // facingMode: { exact: 'environment' }, // Cámara trasera
             width: { ideal: 1920 },
             height: { ideal: 1080 },
           },
@@ -194,7 +194,7 @@ export default function CameraINE() {
               }}
             >
 
-              {isError ?
+              {isError || capturedImage ?
                 <Button variant='contained' color='inherit' onClick={changeStateError} sx={{ textTransform: 'none', fontWeight: 'bold', color:'var(--secondary-dark-blue)' }}> Reintentar </Button>
                 :
                 <IconButton
