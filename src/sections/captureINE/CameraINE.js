@@ -2,6 +2,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongRounded';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import { usePathname } from 'next/navigation';
 import styles from './CameraINE.module.css';
 import { FormDataINE } from "@/sections/captureINE/FormDataINE";
@@ -9,19 +11,19 @@ import { FormDataINE } from "@/sections/captureINE/FormDataINE";
 // hooks
 import useStore from './hooks/useStore';
 import useMutationOCR from "./hooks/useMutationOCR";
+import { Button } from '@mui/material';
 
 
 export default function CameraINE() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const { activeComponent, setActiveComponent, dataINE, setDataINE } = useStore();
+  const { activeComponent, setActiveComponent, dataINE, setDataINE, isLoading, setIsLoading, isError, setIsError } = useStore();
   const pathname = usePathname();
 
-  const [imageFile, setImageFile] = useState(null);
+  // const [imageFile, setImageFile] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
 
-  console.log(dataINE)
   // mutation
   const mutations = useMutationOCR();
 
@@ -71,14 +73,16 @@ export default function CameraINE() {
         tracks.forEach((track) => track.stop());
       }
     };
-  }, [activeComponent]);
+  }, [activeComponent, capturedImage]);
 
   // Subir imagen
   const handleSubmitImage = async (imagen) => {
+    setIsLoading(true)
     const formData = new FormData()
     formData.append("image", imagen || '')
     const data = await mutations.OCR.post.mutateAsync(formData)
     setDataINE(data)
+    setIsLoading(false)
 
   };
 
@@ -122,33 +126,47 @@ export default function CameraINE() {
 
     // Convierte la imagen completa del canvas a un blob
     canvas.toBlob((blob) => {
-      const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
+      const file = new File([blob], 'captured-image.jpg', { type: 'image/jpg' });
       setCapturedImage(URL.createObjectURL(file)); // Guarda la imagen capturada para mostrarla
     }, 'image/jpeg', 1.0);
 
     // Convierte la imagen a un blob para que pueda ser enviada en el FormData
     croppedCanvas.toBlob((blob) => {
-      const file = new File([blob], 'captured-image.jpeg', { type: 'image/jpeg' });
+      const file = new File([blob], 'captured-image.jpg', { type: 'image/jpg' });
 
-      console.log(file)
       // Pasa el archivo a la función handleSubmitImage
       handleSubmitImage(file);
-    }, 'image/jpeg', 1.0);
+    }, 'image/jpg', 1.0);
   };
 
-  // Manejo de carga de archivo manual
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      console.log({ file })  // Establecer el archivo cargado
-      handleSubmitImage(file);  // Subir la imagen directamente
-    }
+  const changeStateError = () => {
+    setIsError(false);
+    setCapturedImage(null);
   };
+
+
+  // // Manejo de carga de archivo manual
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setImageFile(file);
+  //     console.log({ file })  // Establecer el archivo cargado
+  //     handleSubmitImage(file);  // Subir la imagen directamente
+  //   }
+  // };
 
 
   return (
     <>
+      {isLoading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingMessage}>
+            <CircularProgress color="inherit" />
+            <p>Extrayendo datos, por favor espere...</p>
+          </div>
+        </div>
+      )}
+
       {!activeComponent && (
         <div className={styles.container}>
           <div className={styles.cameraContainer}>
@@ -175,14 +193,25 @@ export default function CameraINE() {
                 transform: 'translateX(-50%)',
               }}
             >
-              <IconButton
-                variant="contained"
-                onClick={capturePhoto}
-                disabled={!isCameraActive}
-                sx={{ backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-              >
-                <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
-              </IconButton>
+
+              {isError ?
+                <Button variant='contained' color='inherit' onClick={changeStateError} sx={{ textTransform: 'none', fontWeight: 'bold', color:'var(--secondary-dark-blue)' }}> Reintentar </Button>
+                :
+                <IconButton
+                  variant="contained"
+                  onClick={capturePhoto}
+                  disabled={!isCameraActive}
+                  sx={{
+                    backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', '&:hover': {
+                      backgroundColor: 'white', '& svg': {
+                        color: 'gray',  // Cambiar el color del ícono a gris al hacer hover
+                      },
+                    }
+                  }}
+                >
+                  <CenterFocusStrongRoundedIcon sx={{ fontSize: 36, color: 'var(--primary-sky-blue)' }} />
+                </IconButton>
+              }
             </div>
 
           </div>
@@ -193,19 +222,18 @@ export default function CameraINE() {
       {activeComponent && (
         <div style={{ marginTop: '2rem' }}>
           <FormDataINE />
-          <button onClick={() => setActiveComponent(false)}>Regresar a la cámara</button>
         </div>
       )}
 
-      {/* Campo de carga de imagen */}
-      <div>
+      {/* Campo de carga de imagen
+      <div style={{ paddingBottom: '500px' }}>
         <input
           type="file"
           accept="image/*"
           onChange={handleFileChange}
           style={{ marginTop: '1rem' }}
         />
-      </div>
+      </div> */}
 
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </>

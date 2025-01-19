@@ -22,7 +22,9 @@ export const FormDataINE = () => {
     const [open, setOpen] = useState(false);
 
     // Estados globales
-    const {setActiveComponent } = useStore();
+    const { setActiveComponent, dataINE } = useStore();
+
+    console.log(dataINE)
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -74,14 +76,23 @@ export const FormDataINE = () => {
 
     const { handleSubmit, setValue, formState: { isSubmitting }, control, reset } = methods;
 
+    // Capitalizar textos
+    const capitalize = (text) => {
+        return text
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     // Lógica para llenar el formulario con ineMockData
     useEffect(() => {
-        setValue("nombres", ineMockData.nombres);
-        setValue("primer_apellido", ineMockData.primerApellido);
-        setValue("segundo_apellido", ineMockData.segundoApellido);
-        setValue("curp", ineMockData.curp);
-        setValue("fecha_nacimiento", ineMockData.fechaNacimiento);
-        setValue("calle", ineMockData.direccion.calle);
+        setValue("nombres", capitalize(dataINE?.Nombre || ''));
+        setValue("primer_apellido", capitalize(dataINE?.PrimerApellido || ''));
+        setValue("segundo_apellido", capitalize(dataINE?.SegundoApellido || ''));
+        setValue("curp", dataINE?.CURP || '');
+        setValue("fecha_nacimiento", dataINE?.FechaNacimiento || '');
+        setValue("calle", capitalize(dataINE?.Domicilio || ''));
+
         setValue("cruzamiento_1", ineMockData.direccion.cruzamiento1);
         setValue("cruzamiento_2", ineMockData.direccion.cruzamiento2);
         setValue("numero_interior", ineMockData.direccion.numeroInterior);
@@ -167,11 +178,11 @@ export const FormDataINE = () => {
                         borderRadius: '10px',
                         color: 'var(--secondary-blue)',
                         border: '1px solid var(--secondary-blue)',
-                        display:'flex',
-                        gap:'10px',
-                        justifyContecnt:'center',
+                        display: 'flex',
+                        gap: '10px',
+                        justifyContecnt: 'center',
                     }}>
-                        <InfoOutlinedIcon/>
+                        <InfoOutlinedIcon />
                         <Typography sx={{ fontSize: '1rem' }}>Por seguridad, no compartas estos datos con terceros.</Typography>
                     </Box>
 

@@ -17,23 +17,23 @@ const ClientLayout = ({ children }) => {
 
   const pathname = usePathname(); // Detecta el cambio de ruta
 
-  useEffect(() => {
-    setLoading(true); // Muestra el loading screen cuando cambia la ruta
-    const timeout = setTimeout(() => setLoading(false), 500); // Simula una carga (puedes reemplazarlo por una lógica real)
+  // useEffect(() => {
+  //   setLoading(true); // Muestra el loading screen cuando cambia la ruta
+  //   const timeout = setTimeout(() => setLoading(false), 400); // Simula una carga
 
-    return () => clearTimeout(timeout); // Limpia el timeout
-  }, [pathname]);
+  //   return () => clearTimeout(timeout); // Limpia el timeout
+  // }, [pathname]);
 
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  // if (loading) {
+  //   return <LoadingScreen />;
+  // }
 
   return (
     <QueryClientProvider client={queryClient}>
       <Navbar/>
       {children}
-      {/* <BottomNavigationMenu /> */}
+      <BottomNavigationMenu />
     </QueryClientProvider>
   );
 };
