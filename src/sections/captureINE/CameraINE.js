@@ -49,8 +49,8 @@ export default function CameraINE() {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' }, // Cámara trasera
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: 2560 },  // Resolución ideal 2K
+            height: { ideal: 1440 }, // Resolución de altura 1440
           },
           audio: false,
         });
