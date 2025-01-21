@@ -27,12 +27,8 @@ const useMutationOCR = () => {
                     confirmButtonText: 'Aceptar'
                 });
 
-                // Puedes lanzar un error con el mensaje y código, o manejarlo según sea necesario
-                // throw new Error(`Error ${error.status}: ${error.message}`);
                 setIsError(true);
                 return null;
-
-
             })
     );
 

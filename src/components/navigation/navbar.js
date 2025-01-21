@@ -34,9 +34,9 @@ export default function Navbar() {
             }}
         >
             <img src='/Logos/logoEsigen.png' alt='immage_logo' style={{ width: '120px', height: 'auto', transform: 'scale(0.8)', cursor: 'pointer' }} onClick={handleNavigationLogo} />
-            <IconButton color='white' onClick={handleNavigation}>
+            {/* <IconButton color='white' onClick={handleNavigation}>
                 <HelpOutlineIcon sx={{ color: 'gray', width: '25px', height: '25px', transform: 'scale(1.1)' }} />
-            </IconButton>
+            </IconButton> */}
         </Box>
     );
 }
