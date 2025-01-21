@@ -46,42 +46,20 @@ export default function CameraINE() {
   useEffect(() => {
     const startCamera = async () => {
       try {
-        // Intentamos obtener la resolución 2K
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' }, // Cámara trasera
-            width: { ideal: 2560 },  // Resolución ideal 2K
-            height: { ideal: 1440 }, // Resolución de altura 1440
-            // Las opciones 'ideal' harán que el navegador intente conseguir la mejor resolución posible.
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
           },
           audio: false,
         });
-
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsCameraActive(true);
         }
       } catch (error) {
         console.error('Error al acceder a la cámara:', error);
-
-        // Si no es posible obtener 2K, intentamos con 1080p
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { exact: 'environment' }, // Cámara trasera
-              width: { ideal: 1920 },  // Resolución ideal 1080p
-              height: { ideal: 1080 },
-            },
-            audio: false,
-          });
-
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            setIsCameraActive(true);
-          }
-        } catch (error) {
-          console.error('Error al acceder a la cámara con 1080p:', error);
-        }
       }
     };
 
@@ -134,7 +112,6 @@ export default function CameraINE() {
     croppedCanvas.height = cropHeight;
 
     const croppedContext = croppedCanvas.getContext('2d');
-
     croppedContext.drawImage(
       canvas,
       cropX,
@@ -159,16 +136,6 @@ export default function CameraINE() {
 
       // Pasa el archivo a la función handleSubmitImage
       handleSubmitImage(file);
-
-      // // Crea un enlace de descarga
-      // const url = URL.createObjectURL(blob);
-      // const link = document.createElement('a');
-      // link.href = url;
-      // link.download = 'captured-image.jpg';
-      // link.click();
-
-      // Libera el objeto URL después de la descarga
-      URL.revokeObjectURL(url);
     }, 'image/jpg', 1.0);
   };
 
@@ -228,7 +195,7 @@ export default function CameraINE() {
             >
 
               {isError || capturedImage ?
-                <Button variant='contained' color='inherit' onClick={changeStateError} sx={{ textTransform: 'none', fontWeight: 'bold', color: 'var(--secondary-dark-blue)' }}> Reintentar </Button>
+                <Button variant='contained' color='inherit' onClick={changeStateError} sx={{ textTransform: 'none', fontWeight: 'bold', color:'var(--secondary-dark-blue)' }}> Reintentar </Button>
                 :
                 <IconButton
                   variant="contained"
