@@ -51,6 +51,8 @@ export const FormDataINE = () => {
             .required("Este campo debe estar lleno"),
         curp: yup.string().required("Este campo debe estar lleno"),
         fecha_nacimiento: yup.string().required("Este campo debe estar lleno"),
+        codigo_postal: yup.string().required("Este campo debe estar lleno"),
+
     });
 
     // React Hook Form
@@ -65,7 +67,6 @@ export const FormDataINE = () => {
             calle: "",
             cruzamiento_1: "",
             cruzamiento_2: "",
-            numero_interior: "",
             numero_exterior: "",
             codigo_postal: "",
             colonia: "",
@@ -143,15 +144,14 @@ export const FormDataINE = () => {
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '40px' }}>
                     <Typography sx={{ fontSize: '1.1rem', fontWeight: 'bold' }}> Dirección </Typography>
-                    <RHFTextField name="calle" label="Calle*" {...commonStyles} />
-                    <RHFTextField name="cruzamiento_1" label="Cruzamiento 1*" {...commonStyles} />
-                    <RHFTextField name="cruzamiento_2" label="Cruzamiento 2*" {...commonStyles} />
-                    <RHFTextField name="numero_interior" label="Número interior*" {...commonStyles} />
-                    <RHFTextField name="numero_exterior" label="Número exterior*" {...commonStyles} />
+                    <RHFTextField name="calle" label="Calle" {...commonStyles} />
+                    <RHFTextField name="cruzamiento_1" label="Cruzamiento 1" {...commonStyles} />
+                    <RHFTextField name="cruzamiento_2" label="Cruzamiento 2" {...commonStyles} />
+                    <RHFTextField name="numero_exterior" label="Número exterior" {...commonStyles} />
                     <RHFTextField name="codigo_postal" label="Código postal*" {...commonStyles} inputProps={{ maxLength: 5 }} />
-                    <RHFTextField name="colonia" label="Colonia*" {...commonStyles} />
-                    <RHFTextField name="estado" label="Estado*" {...commonStyles} />
-                    <RHFTextField name="municipio" label="Municipio*" {...commonStyles} />
+                    <RHFTextField name="colonia" label="Colonia" {...commonStyles} />
+                    <RHFTextField name="estado" label="Estado" {...commonStyles} />
+                    <RHFTextField name="municipio" label="Municipio" {...commonStyles} />
                 </Box>
                 <Box sx={{ display: 'flex', gap: '10px', marginTop: '30px', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
                     <LoadingButton type="submit" loading={isSubmitting} startIcon={<QrCodeIcon />} variant="contained" color="success" sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '1rem' }}>
