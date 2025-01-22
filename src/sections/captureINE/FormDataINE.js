@@ -22,7 +22,7 @@ export const FormDataINE = () => {
     const [open, setOpen] = useState(false);
 
     // Estados globales
-    const { setActiveComponent, dataINE } = useStore();
+    const { setActiveComponent, dataINE, setDataINE, setCapturedImage } = useStore();
 
     console.log(dataINE)
 
@@ -35,7 +35,8 @@ export const FormDataINE = () => {
     };
 
     const handleBackCamera = () => {
-        setActiveComponent(false);
+        setDataINE(null);
+        setCapturedImage(null);
     };
 
     // Yup schema
