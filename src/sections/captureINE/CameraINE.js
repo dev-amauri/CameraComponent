@@ -136,12 +136,12 @@ export default function CameraINE() {
 
       // Pasa el archivo a la función handleSubmitImage
       handleSubmitImage(file);
-      // Crea un enlace de descarga
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'captured-image.jpg';
-      link.click();
+      // // Crea un enlace de descarga
+      // const url = URL.createObjectURL(blob);
+      // const link = document.createElement('a');
+      // link.href = url;
+      // link.download = 'captured-image.jpg';
+      // link.click();
 
     }, 'image/jpg', 1.0);
   };
