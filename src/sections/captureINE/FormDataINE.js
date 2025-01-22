@@ -91,16 +91,15 @@ export const FormDataINE = () => {
         setValue("segundo_apellido", capitalize(dataINE?.SegundoApellido || ''));
         setValue("curp", dataINE?.CURP || '');
         setValue("fecha_nacimiento", dataINE?.FechaNacimiento || '');
-        setValue("calle", capitalize(dataINE?.Domicilio || ''));
+        setValue("calle", capitalize(dataINE?.Calle || ''));
 
-        setValue("cruzamiento_1", ineMockData.direccion.cruzamiento1);
-        setValue("cruzamiento_2", ineMockData.direccion.cruzamiento2);
-        setValue("numero_interior", ineMockData.direccion.numeroInterior);
-        setValue("numero_exterior", ineMockData.direccion.numeroExterior);
-        setValue("codigo_postal", ineMockData.direccion.codigoPostal);
-        setValue("colonia", ineMockData.direccion.colonia);
-        setValue("estado", ineMockData.direccion.estado);
-        setValue("municipio", ineMockData.direccion.municipio);
+        setValue("cruzamiento_1", capitalize(dataINE?.Cruzamiento1 || ''));
+        setValue("cruzamiento_2", capitalize(dataINE.Cruzamiento2 || ''));
+        setValue("numero_exterior", capitalize(dataINE?.Numero || ''));
+        setValue("codigo_postal", capitalize(dataINE?.CodigoPostal || ''));
+        setValue("colonia", capitalize(dataINE?.Colonia || ''));
+        setValue("estado", capitalize(dataINE?.Estado || ''));
+        setValue("municipio", capitalize(dataINE?.Municipio || ''));
     }, [setValue]);
 
     const onSubmit = async (data) => {
