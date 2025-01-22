@@ -26,6 +26,7 @@ export default function RootLayout({ children }) {
           async
           src="https://docs.opencv.org/4.x/opencv.js"
         ></script>
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClientLayout> {children}</ClientLayout>
