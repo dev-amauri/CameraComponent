@@ -80,9 +80,19 @@ export const FormDataINE = () => {
 
     // Capitalizar textos
     const capitalize = (text) => {
+        // Expresión regular para detectar números romanos (mayúsculas)
+        const romanRegex = /^(I|V|X|L|C|D|M)+$/;
+
         return text
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .map(word => {
+                // Verifica si la palabra es un número romano
+                if (romanRegex.test(word)) {
+                    return word.toUpperCase(); // Si es romano, lo dejamos en mayúsculas
+                }
+                // Capitaliza el resto del texto
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            })
             .join(' ');
     };
 
@@ -96,7 +106,7 @@ export const FormDataINE = () => {
         setValue("calle", capitalize(dataINE?.Calle || ''));
 
         setValue("cruzamiento_1", capitalize(dataINE?.Cruzamiento1 || ''));
-        setValue("cruzamiento_2", capitalize(dataINE.Cruzamiento2 || ''));
+        setValue("cruzamiento_2", capitalize(dataINE?.Cruzamiento2 || ''));
         setValue("numero_exterior", capitalize(dataINE?.Numero || ''));
         setValue("codigo_postal", capitalize(dataINE?.CodigoPostal || ''));
         setValue("colonia", capitalize(dataINE?.Colonia || ''));
